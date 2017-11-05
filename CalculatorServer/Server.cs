@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
 using System.IO;
-
 
 namespace CalculatorServer
 {
@@ -26,25 +19,33 @@ namespace CalculatorServer
                 while (true)
                 {
                     HttpListenerContext context = l.GetContext();
-                    context.Response.StatusCode = 200;
-                    string num1str = context.Request.QueryString["num1"];
-                    string num2str = context.Request.QueryString["num2"];
-                    string op = context.Request.QueryString["op"];
-                    string calc = Calc(Int32.Parse(num1str), Int32.Parse(num2str), op).ToString();
+					try
+					{
+						string num1str = context.Request.QueryString["num1"];
+						string num2str = context.Request.QueryString["num2"];
+						string op = context.Request.QueryString["op"];
+						string calc = Calc(Int32.Parse(num1str), Int32.Parse(num2str), op).ToString();
 
-                    //context.Response.ContentType = "text/plain";
-                    //context.Response.AddHeader("Access-Control-Allow-Origin", "*");
-                    //context.Response.ContentLength64 = calc.Length;
 
-                    StreamWriter writer = new StreamWriter(context.Response.OutputStream);
-                    writer.WriteLine(calc);
-                    Console.WriteLine(num1str + op + num2str + "=" + calc);
-                    writer.Close();
+						context.Response.StatusCode = 200;
+						context.Response.ContentType = "text/plain";
+						context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+						//context.Response.ContentLength64 = calc.Length;
+
+						StreamWriter writer = new StreamWriter(context.Response.OutputStream);
+						writer.WriteLine(calc);
+						Console.WriteLine(num1str + op + num2str + "=" + calc);
+						writer.Close();
+					}
+					catch
+					{
+						context.Response.StatusCode = 500;
+					}
+                    
                     context.Response.Close();
-                    l.Stop();
                 }
-                
-            }, listener);
+				l.Stop();
+			}, listener);
         }
 
         public int Calc(int num1, int num2, string op)
